@@ -43,11 +43,6 @@ class NoteContext(BaseModel):
     name: Optional[str] = None
     mb_txn_usage: List[select_item] = Field(default_factory=list)
 
-    @field_validator("used_fields", "suggested_fields")
-    @classmethod
-    def no_none(cls, v):
-        return [x for x in v if x]
-
 # ---- Planner summary ----
 def summarize_context(ctx: NoteContext) -> dict:
     return {
