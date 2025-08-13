@@ -6,6 +6,7 @@ from langchain_openai import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import JsonOutputParser
 from dotenv import load_dotenv
+from typing import Optional
 
 # Load environment variables
 load_dotenv()
@@ -24,19 +25,19 @@ OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-5")
 app = FastAPI(title="OSS Note 1804812 Assessment")
 
 class NoteContext(BaseModel):
-    table: str
-    target_type: str
-    target_name: str
-    used_fields: List[str]
-    suggested_fields: List[str]
-    suggested_statement: str
-    pgm_name: str
-    inc_name: str
-    unit_type: str
-    unit_name: str
-    system_name: str
-    enhancement_pack: str
-    environment: str
+    table: Optional[str] = None
+    target_type: Optional[str] = None
+    target_name: Optional[str] = None
+    used_fields: List[str] = []
+    suggested_fields: List[str] = []
+    suggested_statement: Optional[str] = None
+    pgm_name: Optional[str] = None
+    inc_name: Optional[str] = None
+    unit_type: Optional[str] = None
+    unit_name: Optional[str] = None
+    system_name: Optional[str] = None
+    enhancement_pack: Optional[str] = None
+    environment: Optional[str] = None
     detected_transactions: List[str] = Field(default_factory=list)
 
     @field_validator("used_fields", "suggested_fields")
