@@ -31,7 +31,7 @@ class select_item(BaseModel):
     suggested_fields: List[str]
     suggested_statement: Optional[str] = None
 
-    @field_validator("used_fields", "suggested_fields")
+    @field_validator("used_fields", "suggested_fields", mode="before")
     @classmethod
     def no_none(cls, v):
         return [x for x in v if x]
@@ -43,13 +43,15 @@ class NoteContext(BaseModel):
     name: Optional[str] = None
     mb_txn_usage: List[select_item] = Field(default_factory=list)
 
+
 # ---- Planner summary ----
 def summarize_context(ctx: NoteContext) -> dict:
     return {
-        "system": ctx.system_name,
-        "EHP_level": ctx.enhancement_pack,
-        "environment": ctx.environment,
-        "detected_obsolete_transactions": ctx.detected_transactions,
+        "unit_program": ctx.pgm_name,
+        "unit_include": ctx.inc_name,
+        "unit_type": ctx.type,
+        "unit_name": ctx.name,
+        "mb_txn_usage": [item.model_dump() for item in ctx.mb_txn_usage]
     }
 
 # ---- LangChain prompt ----
@@ -107,12 +109,25 @@ def llm_assess(ctx: NoteContext):
     "name": ctx.name})
 
 @app.post("/assess-1804812")
-def assess_note_context(ctx: NoteContext):
-    try:
-        result = llm_assess(ctx)
-    except Exception as e:
-        raise HTTPException(status_code=502, detail=f"LLM call failed: {e}")
-    return result
+def assess_note_context(ctxs: List[NoteContext]):
+    results = []
+    for ctx in ctxs:
+        try:
+            llm_result = llm_assess(ctx)
+        except Exception as e:
+            raise HTTPException(status_code=502, detail=f"LLM call failed: {e}")
+
+        results.append({
+            "pgm_name": ctx.pgm_name,
+            "inc_name": ctx.inc_name,
+            "type": ctx.type,
+            "name": ctx.name,
+            "code": "",  # Assuming no actual ABAP code is passed/analyzed in this API
+            "assessment": llm_result.get("assessment", ""),
+            "llm_prompt": llm_result.get("llm_prompt", "")
+        })
+
+    return results
 
 @app.get("/health")
 def health():
