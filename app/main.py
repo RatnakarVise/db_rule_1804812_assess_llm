@@ -74,7 +74,6 @@ Your job:
     MB1A, MB18, MBC, MB31, MBNL, MBRL, MBSF,
     MBSL, MBST, MBSU in code, replace them with MIGO equivalents.
    - Ensure same behavior, correct T007 etc.
-   - Require output JSON with keys: original_code_snippet, remediated_code_snippet, changes[] (line/before/after/reason).
 
 Return ONLY strict JSON:
 {{
